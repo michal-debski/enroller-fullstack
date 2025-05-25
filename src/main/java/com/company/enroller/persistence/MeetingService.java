@@ -62,12 +62,27 @@ public class MeetingService {
         transaction.commit();
     }
 
+    public void addParticipantToMeeting(Participant participant, Meeting meeting) {
+        meeting.addParticipant(participant);
+        Transaction transaction = session.beginTransaction();
+        session.save(meeting);
+        transaction.commit();
+    }
+
+
     public boolean alreadyExist(Meeting meeting) {
         String hql = "FROM Meeting WHERE title=:title AND date=:date";
         Query query = this.session.createQuery(hql);
         Collection resultList = query.setParameter("title", meeting.getTitle()).setParameter("date", meeting.getDate())
                 .list();
         return query.list().size() != 0;
+    }
+
+    public void deleteParticipantFromMeeting(Participant foundParticipant, Meeting meeting) {
+        meeting.removeParticipant(foundParticipant);
+        Transaction transaction = session.beginTransaction();
+        session.save(meeting);
+        transaction.commit();
     }
 
 }

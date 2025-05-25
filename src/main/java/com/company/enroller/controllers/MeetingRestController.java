@@ -10,7 +10,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Collection;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/meetings")
@@ -75,5 +74,27 @@ public class MeetingRestController {
         meeting.setId(currentMeeting.getId());
         meetingService.update(meeting);
         return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "/{id}/participants/{login}", method = RequestMethod.POST)
+    public ResponseEntity<?> addParticipantToMeeting(@PathVariable("login") String login, @PathVariable("id") long id) {
+        Participant participant = participantService.findByLogin(login);
+        Meeting foundMeeting = meetingService.findById(id);
+        if (participant == null) {
+            Participant newParticipant = new Participant(null, login);
+            participantService.add(newParticipant);
+            meetingService.addParticipantToMeeting(newParticipant, foundMeeting);
+        } else {
+            meetingService.addParticipantToMeeting(participant, foundMeeting);
+        }
+        return new ResponseEntity<>(foundMeeting, HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "/{id}/participants/{login}", method = RequestMethod.DELETE)
+    public ResponseEntity<?> deleteParticipantFromMeeting(@PathVariable long id, @PathVariable String login) {
+        Participant foundParticipant = participantService.findByLogin(login);
+        Meeting foundMeeting = meetingService.findById(id);
+        meetingService.deleteParticipantFromMeeting(foundParticipant, foundMeeting);
+        return new ResponseEntity<Meeting>(foundMeeting, HttpStatus.OK);
     }
 }

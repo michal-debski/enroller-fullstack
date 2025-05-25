@@ -1,12 +1,12 @@
-import handleDeleteMeeting from "./MeetingsPage";
+export default function MeetingsList({meetings, onDelete, onAddParticipant, onDeleteParticipant}) {
 
-export default function MeetingsList({meetings, onDelete}) {
     return (
         <table>
             <thead>
             <tr>
                 <th>Nazwa spotkania</th>
                 <th>Opis</th>
+                <th>Participants</th>
                 <th>Actions</th>
             </tr>
             </thead>
@@ -16,7 +16,27 @@ export default function MeetingsList({meetings, onDelete}) {
                     <td>{meeting.title}</td>
                     <td>{meeting.description}</td>
                     <td>
+                        <table>
+                            <thead>
+                            <tr>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {
+                                meeting.participants.map((participant, index) =>
+                                    <li key={index}>
+                                    <ul>{participant.login} </ul>
+                                    </li>
+                                )
+                            }
+                            </tbody>
+                        </table>
+
+                    </td>
+                    <td>
                         <button onClick={() => onDelete(meeting)}>Usuń</button>
+                        <button onClick={() => onAddParticipant(meeting)}>Przypisz się!</button>
+                        <button onClick={() => onDeleteParticipant(meeting)}>Wypisz się!</button>
                     </td>
                 </tr>)
             }

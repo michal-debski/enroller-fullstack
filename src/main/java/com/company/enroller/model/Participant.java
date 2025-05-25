@@ -9,11 +9,21 @@ import javax.persistence.Table;
 @Table(name = "participant")
 public class Participant {
 
+
     @Id
     private String login;
 
     @Column
     private String password;
+
+    public Participant(String password, String login) {
+            this.login = login;
+            this.password = password;
+        }
+
+    public Participant() {
+
+    }
 
     public String getLogin() {
         return login;
