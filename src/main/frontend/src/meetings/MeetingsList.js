@@ -34,7 +34,7 @@ export default function MeetingsList({meetings, onDelete, onAddParticipant, onDe
 
                     </td>
                     <td>
-                        <button onClick={() => onDelete(meeting)}>Usuń</button>
+                        <button id="deleteButton" onClick={() => onDelete(meeting)}>Usuń</button>
                         <button onClick={() => onAddParticipant(meeting)}>Przypisz się!</button>
                         <button onClick={() => onDeleteParticipant(meeting)}>Wypisz się!</button>
                     </td>

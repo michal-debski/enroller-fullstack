@@ -33,7 +33,7 @@ export default function MeetingsPage({username}) {
                 setMeetings(nextMeetings);
             }
         } else {
-
+            document.getElementById("deleteButton").setAttribute('disabled', 'true')
         }
     }
 
