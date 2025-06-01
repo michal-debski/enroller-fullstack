@@ -56,17 +56,36 @@ public class MeetingService {
         transaction.commit();
     }
 
-    public void update(Meeting meeting) {
+    public Meeting update(Meeting meeting) {
         Transaction transaction = this.session.beginTransaction();
-        this.session.merge(meeting);
+        Meeting meetingFromDatabase = findById(meeting.getId());
+        if (meeting.getDate() != null && !meeting.getDate().isEmpty()) {
+            meetingFromDatabase.setTitle(
+                    meeting.getTitle().isEmpty() ? meetingFromDatabase.getTitle() : meeting.getTitle());
+            meetingFromDatabase.setDescription(
+                    meeting.getDescription().isEmpty() ? meetingFromDatabase.getDescription() : meeting.getDescription());
+            meetingFromDatabase.setDate(meeting.getDate());
+            this.session.merge(meetingFromDatabase);
+        } else {
+            meetingFromDatabase.setTitle(
+                    meeting.getTitle().isEmpty() ? meetingFromDatabase.getTitle() : meeting.getTitle()
+            );
+            meetingFromDatabase.setDescription(
+                    meeting.getDescription().isEmpty() ? meetingFromDatabase.getDescription() : meeting.getDescription()
+            );
+            this.session.merge(meetingFromDatabase);
+        }
         transaction.commit();
+        return meetingFromDatabase;
     }
 
     public void addParticipantToMeeting(Participant participant, Meeting meeting) {
-        meeting.addParticipant(participant);
-        Transaction transaction = session.beginTransaction();
-        session.save(meeting);
-        transaction.commit();
+        if (!meeting.getParticipants().contains(participant)) {
+            meeting.addParticipant(participant);
+            Transaction transaction = session.beginTransaction();
+            session.merge(meeting);
+            transaction.commit();
+        }
     }
 
 

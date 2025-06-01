@@ -2,9 +2,10 @@ import {useEffect, useState} from "react";
 import NewMeetingForm from "./NewMeetingForm";
 import MeetingsList from "./MeetingsList";
 
-export default function MeetingsPage({username}) {
+export default function MeetingsPage({username, participant}) {
     const [meetings, setMeetings] = useState([]);
     const [addingNewMeeting, setAddingNewMeeting] = useState(false);
+    const [updateMeeting, setUpdateMeeting] = useState(null);
 
     async function handleNewMeeting(meeting) {
         const response = await fetch(`/api/meetings`, {
@@ -21,6 +22,21 @@ export default function MeetingsPage({username}) {
 
     }
 
+    async function handleUpdateMeeting(meeting) {
+        const response = await fetch(`/api/meetings/${meeting.id}`, {
+            method: 'PUT',
+            body: JSON.stringify(meeting),
+            headers: {'Content-Type': 'application/json'}
+        });
+        if(response.ok) {
+            const updatedMeeting = await response.json();
+            const nextMeetings = meetings
+                .map(meeting => meeting.id === updatedMeeting.id ? updatedMeeting : meeting);
+            setMeetings(nextMeetings);
+            setUpdateMeeting(null);
+        }
+    }
+
     async function handleDeleteMeeting(meeting) {
         if (meeting.participants.length === 0){
             const response = await fetch(`/api/meetings/${meeting.id}`, {
@@ -32,78 +48,69 @@ export default function MeetingsPage({username}) {
                 const nextMeetings = meetings.filter(m => m !== meeting);
                 setMeetings(nextMeetings);
             }
-        } else {
-            document.getElementById("deleteButton").setAttribute('disabled', 'true')
         }
     }
 
 
-async function handleAddParticipant(meeting) {
-    const response = await fetch(`api/meetings/${meeting.id}/participants/${username}`, {
-        method: 'POST',
-        body: JSON.stringify(meeting),
-        headers: {'Content-Type': 'application.json'}
-    });
-
-    if (response.ok) {
-        const updatedMeeting = await response.json();
-        const nextMeetings = meetings.map(m => {
-            if (m === meeting) {
-                return updatedMeeting
-            } else {
-                return m
-            }
-        })
-        setMeetings(nextMeetings);
-    }
-
-}
-
-async function handleDeleteParticipant(meeting) {
-    const response = await fetch(`api/meetings/${meeting.id}/participants/${username}`, {
-        method: 'DELETE',
-        body: JSON.stringify(meeting),
-        headers: {'Content-Type': 'application.json'}
-    });
-    if (response.ok) {
-        const updatedMeeting = await response.json();
-        const nextMeetings = meetings.map(m => {
-            if (m === meeting) {
-                return updatedMeeting
-            } else {
-                return m
-            }
-        })
-        setMeetings(nextMeetings);
-    }
-}
-
-useEffect(() => {
-    const fetchMeetings = async () => {
-        const response = await fetch(`/api/meetings`);
+    async function handleAddParticipant(meeting) {
+        const response = await fetch(`/api/meetings/${meeting.id}/participants`, {
+            method: 'POST',
+            body: JSON.stringify(participant),
+            headers: {'Content-Type': 'application/json'}
+        });
         if (response.ok) {
-            const meetings = await response.json();
-            setMeetings(meetings);
+            const updatedMeeting = await response.json();
+            const nextMeetings = meetings.map(m =>
+                m.id === updatedMeeting.id ? updatedMeeting : m
+            );
+            setMeetings(nextMeetings);
         }
-    };
-    fetchMeetings();
-}, []);
+    }
 
-return (
-    <div>
-        <h2>Zajęcia ({meetings.length})</h2>
-        {
-            addingNewMeeting
-                ? <NewMeetingForm onSubmit={(meeting) => handleNewMeeting(meeting)}/>
-                : <button onClick={() => setAddingNewMeeting(true)}>Dodaj nowe spotkanie</button>
+    async function handleDeleteParticipant(meeting) {
+        const response = await fetch(`api/meetings/${meeting.id}/participants/${username}`, {
+            method: 'DELETE',
+            body: JSON.stringify(participant),
+            headers: {'Content-Type': 'application/json'}
+        });
+        if (response.ok) {
+            const updatedMeeting = await response.json();
+            const nextMeetings = meetings.map(m =>
+                m.id === updatedMeeting.id ? updatedMeeting : m
+            );
+            setMeetings(nextMeetings);
         }
-        {meetings.length > 0 &&
-            <MeetingsList meetings={meetings} username={username}
-                          onDelete={handleDeleteMeeting}
-                          onAddParticipant={handleAddParticipant}
-                          onDeleteParticipant={handleDeleteParticipant}/>}
+    }
 
-    </div>
-)
+    useEffect(() => {
+        const fetchMeetings = async () => {
+            const response = await fetch(`/api/meetings`);
+            if (response.ok) {
+                const meetings = await response.json();
+                setMeetings(meetings);
+            }
+        };
+        fetchMeetings();
+    }, []);
 
+    return (
+        <div>
+            <h2>Zajęcia ({meetings.length})</h2>
+            {
+                addingNewMeeting
+                    ? <NewMeetingForm onSubmit={(meeting) => handleNewMeeting(meeting)}/>
+                    : <button onClick={() => setAddingNewMeeting(true)}>Dodaj nowe spotkanie</button>
+            }
+            {meetings.length > 0 &&
+                <MeetingsList meetings={meetings} username={username}
+                              onDelete={handleDeleteMeeting}
+                              onAddParticipant={handleAddParticipant}
+                              onDeleteParticipant={handleDeleteParticipant}
+                              setUpdateMeeting={setUpdateMeeting}
+                              updateMeeting={updateMeeting}
+                              onUpdate={handleUpdateMeeting}
+                />}
+
+        </div>
+    )
 }
