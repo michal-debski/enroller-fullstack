@@ -45,8 +45,8 @@ export default function MeetingsList({
                 <th>Nazwa spotkania</th>
                 <th>Data i czas</th>
                 <th>Opis</th>
-                <th>Participants</th>
-                <th>Actions</th>
+                <th>Uczestnicy</th>
+                <th>Akcje</th>
             </tr>
             </thead>
             <tbody>
@@ -78,9 +78,9 @@ export default function MeetingsList({
                                 {showSimilarButtonsForTwoOptions(meeting)}
                             </td>
                             :
-                            <dl>
+                            <td>
                                 {showSimilarButtonsForTwoOptions(meeting)}
-                            </dl>
+                            </td>
                     }
                 </tr>)
             }
